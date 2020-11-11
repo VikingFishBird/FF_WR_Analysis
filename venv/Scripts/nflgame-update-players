@@ -1,4 +1,0 @@
-#!c:\users\bas\documents\github\ff_wr_analysis\venv\scripts\python.exe
-
-import nflgame.update_players
-nflgame.update_players.run()
