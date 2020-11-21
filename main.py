@@ -106,7 +106,6 @@ for year in years:
 
 print(wr_full_data)
 print(wr_full_data.columns)
-print(wr_full_data.describe())
 
 X = np.array(wr_full_data.get(['Rec_pg', 'Tgt_pg', 'Yds_pg', 'Standard', 'HalfPPR', 'FullPPR']))
 y = np.array(wr_full_data.get(['Judge_Std', 'Judge_Half', 'Judge_PPR']))
