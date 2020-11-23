@@ -1,5 +1,5 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import sklearn
@@ -130,25 +130,63 @@ print(best_acc)
 
 pickle_in = open('wr_fantasy_model.pickle', 'rb')
 linear = pickle.load(pickle_in)
+'''
 print(linear.score(x_test, y_test))
+
 
 predictions = linear.predict(x_test)
 for x in range(len(predictions)):
     print(predictions[x], x_test[x], y_test[x])
+'''
 
+# Create CSVs
+standard = []
+half = []
+full = []
+for i in wr_full_data.index:
+    predict = linear.predict([np.array(wr_full_data.get(['Rec_pg', 'Tgt_pg', 'Yds_pg', 'Standard', 'HalfPPR', 'FullPPR']).loc[i]).tolist()])
+    standard.append([wr_full_data.get('Player').loc[i], predict[0][0], wr_full_data.get('Standard').loc[i], wr_full_data.get('Judge_Std').loc[i]])
+    half.append([wr_full_data.get('Player').loc[i], predict[0][1], wr_full_data.get('HalfPPR').loc[i], wr_full_data.get('Judge_Half').loc[i]])
+    full.append([wr_full_data.get('Player').loc[i], predict[0][2], wr_full_data.get('FullPPR').loc[i], wr_full_data.get('Judge_PPR').loc[i]])
 
-# Plots!
-wr_full_data.plot(x='Rec_pg', y='Judge_Std', kind='scatter', alpha=0.5)
-plt.title('Rec_pg vs Judge_Std', fontname='DejaVu Sans', fontsize=18)
-wr_full_data.plot(x='Tgt_pg', y='Judge_Std', kind='scatter', alpha=0.5)
-plt.title('Tgt_pg vs Judge_Std', fontname='DejaVu Sans', fontsize=18)
-wr_full_data.plot(x='Yds_pg', y='Judge_Std', kind='scatter', alpha=0.5)
-plt.title('Yds_pg vs Judge_Std', fontname='DejaVu Sans', fontsize=18)
+f = open('standard.csv', 'w+')
+f.write('player,prediction,assessment,final')
+for i in standard:
+    try:
+        f.write("\n{},{},{},{}".format(i[0], i[1], i[2], i[3]))
+    except:
+        ...
+f.close()
 
+f = open('half.csv', 'w+')
+f.write('player,prediction,assessment,final')
+for i in half:
+    try:
+        f.write("\n{},{},{},{}".format(i[0], i[1], i[2], i[3]))
+    except:
+        ...
+f.close()
 
+f = open('full.csv', 'w+')
+f.write('player,prediction,assessment,final')
+for i in full:
+    try:
+        f.write("\n{},{},{},{}".format(i[0], i[1], i[2], i[3]))
+    except:
+        ...
+f.close()
 
+std_df = pd.read_csv('standard.csv')
+std_df = std_df.assign(prediction_abs_diff=abs(std_df.get('prediction') - std_df.get('final')),
+                       assessment_abs_diff=abs(std_df.get('assessment') - std_df.get('final')))
+half_df = pd.read_csv('half.csv')
+half_df = std_df.assign(prediction_abs_diff=abs(half_df.get('prediction') - half_df.get('final')),
+                       assessment_abs_diff=abs(half_df.get('assessment') - half_df.get('final')))
+full_df = pd.read_csv('full.csv')
+full_df = std_df.assign(prediction_abs_diff=abs(full_df.get('prediction') - full_df.get('final')),
+                       assessment_abs_diff=abs(full_df.get('assessment') - full_df.get('final')))
 
-#plt.show()
-
-
+print('Standard: {} | {}'.format(std_df.get('prediction_abs_diff').mean(), std_df.get('assessment_abs_diff').mean()))
+print('Half: {} | {}'.format(half_df.get('prediction_abs_diff').mean(), half_df.get('assessment_abs_diff').mean()))
+print('Full: {} | {}'.format(full_df.get('prediction_abs_diff').mean(), full_df.get('assessment_abs_diff').mean()))
 
